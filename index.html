@@ -1,11 +1,556 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inocêncio</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inocêncio - Porteiro Virtual</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: "Segoe UI", sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Partículas flutuantes de fundo */
+    .particle {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: float 20s infinite linear;
+    }
+
+    .particle:nth-child(1) {
+      width: 20px;
+      height: 20px;
+      left: 10%;
+      animation-delay: -5s;
+    }
+
+    .particle:nth-child(2) {
+      width: 15px;
+      height: 15px;
+      left: 20%;
+      animation-delay: -10s;
+    }
+
+    .particle:nth-child(3) {
+      width: 25px;
+      height: 25px;
+      left: 30%;
+      animation-delay: -15s;
+    }
+
+    .particle:nth-child(4) {
+      width: 18px;
+      height: 18px;
+      left: 70%;
+      animation-delay: -8s;
+    }
+
+    .particle:nth-child(5) {
+      width: 22px;
+      height: 22px;
+      left: 80%;
+      animation-delay: -2s;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .robot-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .face {
+      width: min(90vw, 90vh);
+      height: min(90vw, 90vh);
+      background: linear-gradient(145deg, #ffffff, #f8f9fa);
+      border-radius: 50%;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 
+        0 20px 60px rgba(0,0,0,0.3), 
+        inset 0 0 40px rgba(255,255,255,0.5),
+        0 0 100px rgba(102, 126, 234, 0.3);
+      position: relative;
+      animation: faceGlow 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes faceGlow {
+      0% {
+        box-shadow: 
+          0 20px 60px rgba(0,0,0,0.3), 
+          inset 0 0 40px rgba(255,255,255,0.5),
+          0 0 100px rgba(102, 126, 234, 0.3);
+      }
+      100% {
+        box-shadow: 
+          0 25px 80px rgba(0,0,0,0.4), 
+          inset 0 0 60px rgba(255,255,255,0.7),
+          0 0 150px rgba(118, 75, 162, 0.4);
+      }
+    }
+
+    /* Olhos enormes para ocupar a tela */
+    .eye {
+      width: 35vw;
+      height: 35vw;
+      max-width: 300px;
+      max-height: 300px;
+      background: radial-gradient(circle at 30% 30%, #00e5ff, #0091ea, #004d63);
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 
+        inset 0 0 50px rgba(0,0,0,0.4),
+        0 0 30px rgba(0, 229, 255, 0.5);
+      animation: eyeShine 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes eyeShine {
+      0% {
+        box-shadow: 
+          inset 0 0 50px rgba(0,0,0,0.4),
+          0 0 30px rgba(0, 229, 255, 0.5);
+      }
+      100% {
+        box-shadow: 
+          inset 0 0 70px rgba(0,0,0,0.2),
+          0 0 50px rgba(0, 229, 255, 0.8);
+      }
+    }
+
+    /* Reflexo nos olhos */
+    .eye::before {
+      content: '';
+      position: absolute;
+      top: 15%;
+      left: 25%;
+      width: 30%;
+      height: 40%;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.8), transparent);
+      border-radius: 50%;
+      animation: eyeReflection 5s ease-in-out infinite;
+    }
+
+    @keyframes eyeReflection {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.1); }
+    }
+
+    /* Pupila */
+    .pupil {
+      width: 40%;
+      height: 40%;
+      background: radial-gradient(circle at 30% 30%, #1a1a1a, #000000);
+      border-radius: 50%;
+      position: absolute;
+      top: 30%;
+      left: 30%;
+      transition: transform 0.2s cubic-bezier(0.23, 1, 0.320, 1);
+      box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    /* Pupila brilho */
+    .pupil::after {
+      content: '';
+      position: absolute;
+      top: 20%;
+      left: 25%;
+      width: 25%;
+      height: 25%;
+      background: rgba(255,255,255,0.9);
+      border-radius: 50%;
+      animation: pupilGlow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes pupilGlow {
+      0% { opacity: 0.9; transform: scale(1); }
+      100% { opacity: 0.6; transform: scale(1.2); }
+    }
+
+    /* Pálpebra animada */
+    .eyelid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+      animation: blink 4s infinite;
+      transform-origin: top;
+      border-radius: 50%;
+    }
+
+    @keyframes blink {
+      0%, 90%, 100% { transform: scaleY(0); }
+      93%, 97% { transform: scaleY(1); }
+    }
+
+    /* Boca expressiva */
+    .mouth {
+      width: 25vw;
+      height: 12vw;
+      max-width: 200px;
+      max-height: 100px;
+      border-bottom: 8px solid #00e5ff;
+      border-radius: 0 0 200px 200px;
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 
+        0 0 20px rgba(0, 229, 255, 0.6),
+        inset 0 -5px 10px rgba(0, 229, 255, 0.3);
+      animation: mouthTalk 3s ease-in-out infinite;
+    }
+
+    @keyframes mouthTalk {
+      0%, 100% { 
+        transform: translateX(-50%) scaleY(1);
+        border-bottom-width: 8px;
+      }
+      25% { 
+        transform: translateX(-50%) scaleY(0.7);
+        border-bottom-width: 12px;
+      }
+      75% { 
+        transform: translateX(-50%) scaleY(1.2);
+        border-bottom-width: 6px;
+      }
+    }
+
+    /* Antenas decorativas */
+    .antenna {
+      position: absolute;
+      top: -30px;
+      width: 4px;
+      height: 60px;
+      background: linear-gradient(to bottom, #00e5ff, #0091ea);
+      border-radius: 2px;
+      animation: antennaWave 2s ease-in-out infinite alternate;
+    }
+
+    .antenna.left {
+      left: 30%;
+      transform-origin: bottom;
+    }
+
+    .antenna.right {
+      right: 30%;
+      transform-origin: bottom;
+    }
+
+    .antenna::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -4px;
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle, #00e5ff, #0091ea);
+      border-radius: 50%;
+      box-shadow: 0 0 15px rgba(0, 229, 255, 0.8);
+      animation: antennaTip 1s ease-in-out infinite alternate;
+    }
+
+    @keyframes antennaWave {
+      0% { transform: rotate(-10deg); }
+      100% { transform: rotate(10deg); }
+    }
+
+    @keyframes antennaTip {
+      0% { box-shadow: 0 0 15px rgba(0, 229, 255, 0.8); }
+      100% { box-shadow: 0 0 25px rgba(0, 229, 255, 1), 0 0 35px rgba(0, 229, 255, 0.5); }
+    }
+
+    /* Mensagem de fala animada */
+    .speech {
+      position: absolute;
+      bottom: -15vh;
+      width: 100%;
+      text-align: center;
+      font-size: min(6vw, 40px);
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 
+        0 2px 4px rgba(0,0,0,0.5),
+        0 0 20px rgba(255,255,255,0.5);
+      animation: speechGlow 2s ease-in-out infinite alternate;
+      z-index: 20;
+    }
+
+    @keyframes speechGlow {
+      0% {
+        text-shadow: 
+          0 2px 4px rgba(0,0,0,0.5),
+          0 0 20px rgba(255,255,255,0.5);
+      }
+      100% {
+        text-shadow: 
+          0 2px 4px rgba(0,0,0,0.7),
+          0 0 30px rgba(255,255,255,0.8),
+          0 0 40px rgba(0, 229, 255, 0.6);
+      }
+    }
+
+    /* Efeito de ondas de energia */
+    .energy-wave {
+      position: absolute;
+      width: 120%;
+      height: 120%;
+      border: 2px solid rgba(0, 229, 255, 0.3);
+      border-radius: 50%;
+      top: -10%;
+      left: -10%;
+      animation: energyPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes energyPulse {
+      0% {
+        transform: scale(0.8);
+        opacity: 0.8;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0.3;
+      }
+      100% {
+        transform: scale(0.8);
+        opacity: 0.8;
+      }
+    }
+
+    /* Responsividade para tablets */
+    @media (orientation: landscape) {
+      .face {
+        width: min(80vh, 90vw);
+        height: min(80vh, 90vw);
+      }
+      
+      .eye {
+        width: min(25vh, 30vw);
+        height: min(25vh, 30vw);
+      }
+      
+      .speech {
+        font-size: min(4vh, 35px);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .face {
+        width: 85vw;
+        height: 85vw;
+      }
+      
+      .eye {
+        width: 35vw;
+        height: 20vw;
+      }
+      
+      .face {
+        width: 85vw;
+        height: 70vw;
+      }
+    }
+  </style>
 </head>
 <body>
+  <!-- Partículas de fundo -->
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+
+  <div class="robot-container">
+    <div class="face">
+      <div class="energy-wave"></div>
+      <div class="antenna left"></div>
+      <div class="antenna right"></div>
+      
+      <div class="eye">
+        <div class="pupil"></div>
+        <div class="eyelid"></div>
+      </div>
+      
+      <div class="eye">
+        <div class="pupil"></div>
+        <div class="eyelid"></div>
+      </div>
+      
+      <div class="mouth"></div>
+    </div>
     
+    <div class="speech" id="speechText">Olá! Eu sou o Inocêncio, seu porteiro virtual!</div>
+  </div>
+
+  <script>
+    // Frases amigáveis do Inocêncio
+    const phrases = [
+      "Olá! Eu sou o Inocêncio, seu porteiro virtual!",
+      "Bem-vindos ao nosso evento especial! 🎉",
+      "É um prazer recebê-los aqui hoje!",
+      "Que alegria ter vocês conosco!",
+      "Preparem-se para uma experiência incrível!",
+      "Sejam muito bem-vindos! Vamos começar?"
+    ];
+
+    let phraseIndex = 0;
+    const speechElement = document.getElementById('speechText');
+
+    // Troca de frases a cada 4 segundos
+    setInterval(() => {
+      phraseIndex = (phraseIndex + 1) % phrases.length;
+      speechElement.textContent = phrases[phraseIndex];
+      
+      // Efeito de escala na troca de frase
+      speechElement.style.transform = 'scale(1.1)';
+      setTimeout(() => {
+        speechElement.style.transform = 'scale(1)';
+      }, 200);
+    }, 4000);
+
+    // Função para mover pupilas
+    function movePupils(clientX, clientY) {
+      const pupils = document.querySelectorAll(".pupil");
+      pupils.forEach(pupil => {
+        const eye = pupil.parentElement;
+        const rect = eye.getBoundingClientRect();
+        const eyeCenterX = rect.left + rect.width / 2;
+        const eyeCenterY = rect.top + rect.height / 2;
+        
+        // Calcula a distância e direção do olhar
+        const deltaX = clientX - eyeCenterX;
+        const deltaY = clientY - eyeCenterY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        
+        // Limita o movimento da pupila dentro do olho
+        const maxDistance = rect.width * 0.15;
+        const limitedDistance = Math.min(distance, maxDistance);
+        const angle = Math.atan2(deltaY, deltaX);
+        
+        const moveX = Math.cos(angle) * limitedDistance;
+        const moveY = Math.sin(angle) * limitedDistance;
+        
+        pupil.style.transform = `translate(${moveX}px, ${moveY}px)`;
+      });
+    }
+
+    // Pupilas seguem o mouse
+    document.addEventListener("mousemove", (e) => {
+      movePupils(e.clientX, e.clientY);
+    });
+
+    // Adaptação para tablet: olhar segue o toque
+    document.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      movePupils(touch.clientX, touch.clientY);
+    });
+
+    // Efeito de clique/toque para interação
+    document.addEventListener("click", (e) => {
+      createRipple(e.clientX, e.clientY);
+    });
+
+    document.addEventListener("touchstart", (e) => {
+      const touch = e.touches[0];
+      createRipple(touch.clientX, touch.clientY);
+    });
+
+    // Cria efeito de ondas ao tocar
+    function createRipple(x, y) {
+      const ripple = document.createElement('div');
+      ripple.style.position = 'fixed';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      ripple.style.width = '20px';
+      ripple.style.height = '20px';
+      ripple.style.background = 'rgba(0, 229, 255, 0.6)';
+      ripple.style.borderRadius = '50%';
+      ripple.style.transform = 'translate(-50%, -50%)';
+      ripple.style.pointerEvents = 'none';
+      ripple.style.zIndex = '1000';
+      ripple.style.animation = 'rippleEffect 0.8s ease-out forwards';
+      
+      document.body.appendChild(ripple);
+      
+      // Remove o elemento após a animação
+      setTimeout(() => {
+        ripple.remove();
+      }, 800);
+    }
+
+    // Adiciona keyframes para o efeito ripple via JavaScript
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes rippleEffect {
+        0% {
+          transform: translate(-50%, -50%) scale(0);
+          opacity: 0.8;
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(20);
+          opacity: 0;
+        }
+      }
+      
+      .speech {
+        transition: transform 0.2s ease-in-out;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Movimento automático ocasional das pupilas
+    setInterval(() => {
+      if (!document.querySelector(':hover')) {
+        const randomX = Math.random() * window.innerWidth;
+        const randomY = Math.random() * window.innerHeight;
+        movePupils(randomX, randomY);
+      }
+    }, 8000);
+
+    // Prevenção de scroll em dispositivos móveis
+    document.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+  </script>
 </body>
 </html>
