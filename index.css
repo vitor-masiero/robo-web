@@ -92,7 +92,7 @@
     .face {
       width: min(90vw, 90vh);
       height: min(90vw, 90vh);
-      background: linear-gradient(145deg, #ffffff, #f8f9fa);
+      background: linear-gradient(145deg, #fdfcfc, #e4e4e4);
       border-radius: 50%;
       display: flex;
       justify-content: space-around;
@@ -126,12 +126,12 @@
       height: 35vw;
       max-width: 300px;
       max-height: 300px;
-      background: radial-gradient(circle at 30% 30%, #00e5ff, #0091ea, #004d63);
+      background: radial-gradient(circle at 30% 30%, #1fc2d4, #0091ea, #0b6680);
       border-radius: 50%;
       position: relative;
       overflow: hidden;
       box-shadow: 
-        inset 0 0 50px rgba(0,0,0,0.4),
+        inset 0 0 50px rgba(0,0,0,0.4),S
         0 0 30px rgba(0, 229, 255, 0.5);
       animation: eyeShine 3s ease-in-out infinite alternate;
     }
