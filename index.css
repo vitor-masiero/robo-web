@@ -184,7 +184,7 @@ body {
 .face {
   width: min(90vw, 90vh);
   height: min(90vw, 90vh);
-  background: linear-gradient(145deg, #fdfcfc, #e4e4e4);
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
   border-radius: 50%;
   display: flex;
   justify-content: space-around;
@@ -193,24 +193,6 @@ body {
     inset 0 0 40px rgba(255, 255, 255, 0.5), 0 0 100px rgba(102, 126, 234, 0.3);
   position: relative;
   animation: faceGlow 4s ease-in-out infinite alternate;
-  transition: all 0.5s ease;
-}
-
-/* Estados do rosto */
-.face.hibernating {
-  filter: brightness(0.7) saturate(0.5);
-}
-
-.face.listening {
-  animation: faceGlowActive 1s ease-in-out infinite alternate;
-}
-
-.face.processing {
-  animation: faceGlowProcessing 0.5s ease-in-out infinite alternate;
-}
-
-.face.speaking {
-  animation: faceGlowSpeaking 0.3s ease-in-out infinite alternate;
 }
 
 @keyframes faceGlow {
@@ -264,22 +246,12 @@ body {
   height: 35vw;
   max-width: 300px;
   max-height: 300px;
-  background: radial-gradient(circle at 30% 30%, #1fc2d4, #0091ea, #0b6680);
+  background: radial-gradient(circle at 30% 30%, #00e5ff, #0091ea, #004d63);
   border-radius: 50%;
   position: relative;
   overflow: hidden;
   box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 229, 255, 0.5);
   animation: eyeShine 3s ease-in-out infinite alternate;
-  transition: all 0.3s ease;
-}
-
-/* Estados dos olhos */
-.eye.closed {
-  transform: scaleY(0.1);
-}
-
-.eye.wide {
-  transform: scale(1.1);
 }
 
 @keyframes eyeShine {
