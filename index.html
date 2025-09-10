@@ -1,42 +1,67 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inocêncio - Porteiro Virtual</title>
-  <link rel="stylesheet" href="index.css">
-</head>
-<body>
-  <!-- Partículas de fundo -->
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
-  <div class="particle"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inocêncio - Porteiro Virtual</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
 
-  <div class="robot-container">
-    <div class="face">
-      <div class="energy-wave"></div>
-      <div class="antenna left"></div>
-      <div class="antenna right"></div>
-      
-      <div class="eye">
-        <div class="pupil"></div>
-        <div class="eyelid"></div>
+    <div class="status-container">
+      <div class="status-indicator" id="listeningStatus">
+        <div class="status-icon hibernating" id="statusIcon"></div>
+        <span class="status-text" id="statusText">Hibernando...</span>
       </div>
-      
-      <div class="eye">
-        <div class="pupil"></div>
-        <div class="eyelid"></div>
+      <div class="volume-indicator" id="volumeIndicator">
+        <div class="volume-bar"></div>
+        <div class="volume-bar"></div>
+        <div class="volume-bar"></div>
+        <div class="volume-bar"></div>
+        <div class="volume-bar"></div>
       </div>
-      
-      <div class="mouth"></div>
     </div>
-    
-    <div class="speech" id="speechText">Olá! Eu sou o Inocêncio, seu porteiro virtual!</div>
-  </div>
 
-  <script src="index.js">
-  </script>
-</body>
+    <div class="robot-container">
+      <div class="face" id="robotFace">
+        <div class="energy-wave"></div>
+        <div class="antenna left"></div>
+        <div class="antenna right"></div>
+
+        <div class="eye" id="leftEye">
+          <div class="pupil"></div>
+          <div class="eyelid"></div>
+        </div>
+
+        <div class="eye" id="rightEye">
+          <div class="pupil"></div>
+          <div class="eyelid"></div>
+        </div>
+
+        <div class="mouth" id="robotMouth"></div>
+      </div>
+
+      <div class="speech" id="speechText">
+        Diga "Inocêncio" para me acordar!
+      </div>
+    </div>
+
+    <div class="debug-panel" id="debugPanel">
+      <button id="toggleListening">Iniciar/Parar Escuta</button>
+      <button id="testTTS">Testar TTS</button>
+      <div class="debug-info">
+        <p>Status: <span id="debugStatus">Inicializando...</span></p>
+        <p>Última transcrição: <span id="lastTranscription">-</span></p>
+      </div>
+    </div>
+
+    <button class="debug-toggle" id="debugToggle">🔧</button>
+
+    <script src="index.js"></script>
+  </body>
 </html>
