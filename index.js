@@ -1,6 +1,6 @@
 // Configurações da API
 const API_BASE_URL = "http://127.0.0.1:8000"; // Ajustar para sua API
-const WAKE_WORD = "inocêncio";
+const WAKE_WORD = "inocencio";
 
 // Estados do sistema
 const STATES = {

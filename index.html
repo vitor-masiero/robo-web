@@ -3,64 +3,50 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inocêncio - Porteiro Virtual</title>
+    <title>Inocêncio - Assistente Virtual</title>
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
-    <div class="particle"></div>
+    <!-- Partículas de fundo -->
     <div class="particle"></div>
     <div class="particle"></div>
     <div class="particle"></div>
     <div class="particle"></div>
 
-    <div class="status-container">
-      <div class="status-indicator" id="listeningStatus">
-        <div class="status-icon hibernating" id="statusIcon"></div>
-        <span class="status-text" id="statusText">Hibernando...</span>
-      </div>
-      <div class="volume-indicator" id="volumeIndicator">
-        <div class="volume-bar"></div>
-        <div class="volume-bar"></div>
-        <div class="volume-bar"></div>
-        <div class="volume-bar"></div>
-        <div class="volume-bar"></div>
-      </div>
-    </div>
+    <!-- Indicador de status -->
+    <div class="status-indicator" id="statusIndicator">● HIBERNANDO</div>
 
-    <div class="robot-container">
-      <div class="face" id="robotFace">
-        <div class="energy-wave"></div>
-        <div class="antenna left"></div>
-        <div class="antenna right"></div>
-
-        <div class="eye" id="leftEye">
-          <div class="pupil"></div>
-          <div class="eyelid"></div>
-        </div>
-
-        <div class="eye" id="rightEye">
-          <div class="pupil"></div>
-          <div class="eyelid"></div>
-        </div>
-
-        <div class="mouth" id="robotMouth"></div>
+    <!-- Container dos olhos -->
+    <div class="eyes-container">
+      <div class="eye" id="leftEye">
+        <div class="energy-ring"></div>
+        <div class="energy-ring"></div>
+        <div class="pupil"></div>
+        <div class="eyelid"></div>
       </div>
 
-      <div class="speech" id="speechText">
-        Diga "Inocêncio" para me acordar!
+      <div class="eye" id="rightEye">
+        <div class="energy-ring"></div>
+        <div class="energy-ring"></div>
+        <div class="pupil"></div>
+        <div class="eyelid"></div>
       </div>
     </div>
 
-    <div class="debug-panel" id="debugPanel">
-      <button id="toggleListening">Iniciar/Parar Escuta</button>
-      <button id="testTTS">Testar TTS</button>
-      <div class="debug-info">
-        <p>Status: <span id="debugStatus">Inicializando...</span></p>
-        <p>Última transcrição: <span id="lastTranscription">-</span></p>
-      </div>
+    <!-- Controles de áudio (ocultos) -->
+    <audio id="responseAudio" preload="auto"></audio>
+
+    <!-- Indicadores visuais -->
+    <div class="listening-indicator" id="listeningIndicator">
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
     </div>
 
-    <button class="debug-toggle" id="debugToggle">🔧</button>
+    <div class="processing-indicator" id="processingIndicator">
+      <div class="spinner"></div>
+      <span>Processando...</span>
+    </div>
 
     <script src="index.js"></script>
   </body>
