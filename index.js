@@ -99,16 +99,16 @@ class InocencioVoiceAssistant {
       throw new Error("Biblioteca de reconhecimento de voz não carregada");
     }
 
-    // Testa se a API está acessível
+    // Testa se a API está acessível usando uma rota que existe
     try {
-      const response = await fetch(`${API_BASE_URL}/check`, {
+      const response = await fetch(`${API_BASE_URL}/tts?text=teste`, {
         method: "GET",
-        timeout: 5000,
       });
       if (!response.ok) throw new Error("API não responsiva");
       console.log("✅ API conectada");
     } catch (error) {
-      throw new Error("API não acessível em " + API_BASE_URL);
+      console.warn("⚠️ API pode não estar acessível:", error.message);
+      // Não falha a inicialização por causa da API - continua mesmo assim
     }
   }
 
@@ -408,10 +408,11 @@ class InocencioVoiceAssistant {
     this.setState(STATES.HIBERNATING);
     this.updateStatus("PRONTO - Diga 'Inocêncio'");
 
-    // Volta a detectar palavra-chave após 2 segundos
+    // Aguarda um tempo maior antes de voltar a escutar
+    // Isso dá tempo para o backend limpar recursos
     setTimeout(() => {
       this.startWakeWordDetection();
-    }, 2000);
+    }, 3000); // Aumentado de 2s para 3s
   }
 
   setState(newState) {
