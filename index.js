@@ -12,6 +12,8 @@ const STATES = {
   ERROR: "error",
 };
 
+
+
 class InocencioVoiceAssistant {
   constructor() {
     this.currentState = STATES.HIBERNATING;
@@ -43,6 +45,29 @@ class InocencioVoiceAssistant {
     ];
 
     this.init();
+  }
+
+  
+  //Função adicionada para limpeza de recursos
+  cleanupRecording() {
+      console.log("🧹 Limpando recursos de gravação...");
+      
+      // Limpar timeout se existir
+      if (this.questionTimeout) {
+          clearTimeout(this.questionTimeout);
+          this.questionTimeout = null;
+      }
+      
+      // Parar MediaRecorder se ainda estiver ativo
+      if (this.mediaRecorder) {
+          if (this.mediaRecorder.state === 'recording') {
+              this.mediaRecorder.stop();
+          }
+          this.mediaRecorder = null;
+      }
+      
+      // Limpar chunks de áudio
+      this.audioChunks = [];
   }
 
   async init() {
@@ -279,6 +304,8 @@ class InocencioVoiceAssistant {
       return;
     }
 
+    this.cleanupRecording();
+
     console.log("📹 Capturando pergunta...");
     this.audioChunks = [];
 
@@ -306,6 +333,7 @@ class InocencioVoiceAssistant {
 
       this.mediaRecorder.onerror = (event) => {
         console.error("❌ Erro no MediaRecorder:", event);
+        this.cleanupRecording(); //Fazendo a limpeza do áudio depois de dar erro
         this.handleError("Erro na captura de áudio");
       };
 
@@ -315,6 +343,7 @@ class InocencioVoiceAssistant {
       // Para gravação após 5 segundos
       this.questionTimeout = setTimeout(() => {
         if (this.mediaRecorder && this.mediaRecorder.state === "recording") {
+          console.log("⏹️ Gravação parada após timeout");
           this.mediaRecorder.stop();
         }
       }, 5000);
@@ -323,6 +352,7 @@ class InocencioVoiceAssistant {
       this.startListeningAnimation();
     } catch (error) {
       console.error("❌ Erro ao configurar gravação:", error);
+      this.cleanupRecording(); //LImpando denovo se der erro
       this.handleError("Erro na configuração de áudio");
     }
   }
@@ -337,6 +367,10 @@ class InocencioVoiceAssistant {
     this.updateStatus("PROCESSANDO...");
 
     try {
+
+      //adicionei para verificação da existencia do mediaRecorder
+      const mimeType = this.mediaRecorder ? this.mediaRecorder.mimeType : "audio/webm";
+      
       // Cria blob do áudio
       const audioBlob = new Blob(this.audioChunks, {
         type: this.mediaRecorder.mimeType,
@@ -354,6 +388,9 @@ class InocencioVoiceAssistant {
       const response = await fetch(`${API_BASE_URL}/voice`, {
         method: "POST",
         body: formData,
+
+        //Adicionei um timeout para evitar travamento
+        signal: AbortSignal.timeout(30000), // José mexeu aqui
       });
 
       if (!response.ok) {
@@ -372,6 +409,12 @@ class InocencioVoiceAssistant {
     } catch (error) {
       console.error("❌ Erro no processamento:", error);
       this.handleError("Erro: " + error.message);
+
+      //Finally: depois do try, ou do catch, sempre vai cair aqui, limpando sempre a gravação
+    } finally {
+
+      //Adicionei a limpeza de recursos
+      this.cleanupRecording();
     }
   }
 
@@ -405,6 +448,9 @@ class InocencioVoiceAssistant {
 
   onResponseEnded() {
     console.log("🔄 Voltando ao modo hibernação");
+
+    this.cleanupRecording();
+
     this.setState(STATES.HIBERNATING);
     this.updateStatus("PRONTO - Diga 'Inocêncio'");
 
@@ -666,3 +712,4 @@ window.addEventListener("beforeunload", () => {
     annyang.abort();
   }
 });
+
