@@ -10,7 +10,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   font-family: "Arial", sans-serif;
   overflow: hidden;
   position: relative;
@@ -19,10 +19,10 @@ body {
 /* Partículas tecnológicas de fundo */
 .particle {
   position: absolute;
-  background: rgba(52, 152, 219, 0.1);
+  background: rgba(100, 200, 255, 0.15);
   border-radius: 50%;
   pointer-events: none;
-  animation: float 15s infinite linear;
+  animation: float 20s infinite linear;
 }
 
 .particle:nth-child(1) {
@@ -59,10 +59,10 @@ body {
     opacity: 0;
   }
   10% {
-    opacity: 0.6;
+    opacity: 0.8;
   }
   90% {
-    opacity: 0.6;
+    opacity: 0.8;
   }
   100% {
     transform: translateY(-100vh) rotate(360deg);
@@ -78,306 +78,525 @@ body {
   justify-content: center;
   position: relative;
   z-index: 10;
-  gap: min(8vw, 60px);
+  gap: min(6vw, 50px);
 }
 
-/* Estados dos olhos baseados no status do assistente */
+/* Olhos redesenhados para ser mais amigáveis */
 .eye {
-  width: min(35vw, 280px);
-  height: min(35vw, 280px);
-  background: radial-gradient(circle at 35% 30%, #3498db, #2980b9, #1f4e79);
+  width: min(32vw, 260px);
+  height: min(32vw, 260px);
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
   border-radius: 50%;
   position: relative;
-  overflow: hidden;
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.3),
-    0 0 30px rgba(52, 152, 219, 0.4), 0 0 60px rgba(52, 152, 219, 0.2);
-  animation: eyeGlow 3s ease-in-out infinite alternate;
-  border: 4px solid #34495e;
-  transition: all 0.5s ease-in-out;
+  overflow: visible;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 4px rgba(255, 255, 255, 0.1),
+    inset 0 4px 16px rgba(255, 255, 255, 0.3),
+    inset 0 -4px 16px rgba(0, 0, 0, 0.1);
+  animation: eyeBreathe 4s ease-in-out infinite;
+  border: 3px solid rgba(100, 200, 255, 0.3);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Estado hibernando (olhos mais escuros) */
+/* Estados dos olhos mais expressivos */
 .eye.hibernating {
-  background: radial-gradient(circle at 35% 30%, #34495e, #2c3e50, #1a252f);
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5),
-    0 0 15px rgba(52, 152, 219, 0.2);
-  animation: eyeDim 4s ease-in-out infinite alternate;
+  background: linear-gradient(145deg, #e8eaf6, #c5cae9);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15),
+    inset 0 2px 8px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.05);
+  border-color: rgba(100, 200, 255, 0.2);
+  animation: eyeSleep 5s ease-in-out infinite;
 }
 
-/* Estado ativo (olhos brilhantes) */
 .eye.active {
-  background: radial-gradient(circle at 35% 30%, #3498db, #2980b9, #1f4e79);
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.2),
-    0 0 50px rgba(52, 152, 219, 0.6), 0 0 100px rgba(52, 152, 219, 0.4);
-  animation: eyeActive 1s ease-in-out infinite alternate;
+  background: linear-gradient(145deg, #ffffff, #f0f8ff);
+  box-shadow: 0 12px 40px rgba(100, 200, 255, 0.3),
+    0 0 0 4px rgba(100, 200, 255, 0.2),
+    inset 0 4px 20px rgba(255, 255, 255, 0.4),
+    inset 0 -4px 20px rgba(100, 200, 255, 0.1);
+  border-color: rgba(100, 200, 255, 0.5);
+  animation: eyeJoy 2s ease-in-out infinite;
 }
 
-/* Estado escutando (olhos pulsando) */
 .eye.listening {
-  background: radial-gradient(circle at 35% 30%, #e67e22, #d35400, #a0522d);
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.3),
-    0 0 40px rgba(230, 126, 34, 0.6), 0 0 80px rgba(230, 126, 34, 0.4);
-  animation: eyeListening 0.8s ease-in-out infinite alternate;
+  background: linear-gradient(145deg, #fff3e0, #ffe0b2);
+  box-shadow: 0 12px 40px rgba(255, 152, 0, 0.3),
+    0 0 0 4px rgba(255, 152, 0, 0.2), inset 0 4px 20px rgba(255, 255, 255, 0.4),
+    inset 0 -4px 20px rgba(255, 152, 0, 0.1);
+  border-color: rgba(255, 152, 0, 0.4);
+  animation: eyeAttention 1.5s ease-in-out infinite;
 }
 
-/* Estado processando (olhos roxos) */
 .eye.processing {
-  background: radial-gradient(circle at 35% 30%, #9b59b6, #8e44ad, #6a1b9a);
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.3),
-    0 0 40px rgba(155, 89, 182, 0.6), 0 0 80px rgba(155, 89, 182, 0.4);
-  animation: eyeProcessing 0.6s ease-in-out infinite;
+  background: linear-gradient(145deg, #f3e5f5, #e1bee7);
+  box-shadow: 0 12px 40px rgba(156, 39, 176, 0.3),
+    0 0 0 4px rgba(156, 39, 176, 0.2), inset 0 4px 20px rgba(255, 255, 255, 0.4),
+    inset 0 -4px 20px rgba(156, 39, 176, 0.1);
+  border-color: rgba(156, 39, 176, 0.4);
+  animation: eyeThinking 1s ease-in-out infinite;
 }
 
-@keyframes eyeGlow {
-  0% {
-    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.3),
-      0 0 30px rgba(52, 152, 219, 0.4), 0 0 60px rgba(52, 152, 219, 0.2);
-  }
+/* Animações mais orgânicas */
+@keyframes eyeBreathe {
+  0%,
   100% {
-    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.2),
-      0 0 40px rgba(52, 152, 219, 0.6), 0 0 80px rgba(52, 152, 219, 0.3);
-  }
-}
-
-@keyframes eyeDim {
-  0% {
-    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5),
-      0 0 15px rgba(52, 152, 219, 0.2);
-  }
-  100% {
-    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.6),
-      0 0 20px rgba(52, 152, 219, 0.3);
-  }
-}
-
-@keyframes eyeActive {
-  0% {
-    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.2),
-      0 0 50px rgba(52, 152, 219, 0.6), 0 0 100px rgba(52, 152, 219, 0.4);
-  }
-  100% {
-    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.1),
-      0 0 70px rgba(52, 152, 219, 0.8), 0 0 120px rgba(52, 152, 219, 0.6);
-  }
-}
-
-@keyframes eyeListening {
-  0% {
     transform: scale(1);
-    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.3),
-      0 0 40px rgba(230, 126, 34, 0.6), 0 0 80px rgba(230, 126, 34, 0.4);
   }
-  100% {
-    transform: scale(1.05);
-    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.2),
-      0 0 60px rgba(230, 126, 34, 0.8), 0 0 100px rgba(230, 126, 34, 0.6);
+  50% {
+    transform: scale(1.02);
   }
 }
 
-@keyframes eyeProcessing {
+@keyframes eyeSleep {
+  0%,
+  100% {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+}
+
+@keyframes eyeJoy {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.05) rotate(0.5deg);
+  }
+  75% {
+    transform: scale(1.05) rotate(-0.5deg);
+  }
+}
+
+@keyframes eyeAttention {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes eyeThinking {
   0% {
-    transform: rotate(0deg) scale(1);
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.03) rotate(1deg);
+  }
+  50% {
+    transform: scale(1.06) rotate(0deg);
+  }
+  75% {
+    transform: scale(1.03) rotate(-1deg);
   }
   100% {
-    transform: rotate(360deg) scale(1.02);
+    transform: scale(1) rotate(0deg);
   }
 }
 
-/* Reflexo tecnológico nos olhos */
+/* Reflexo mais suave e natural */
 .eye::before {
   content: "";
   position: absolute;
-  top: 15%;
-  left: 25%;
-  width: 35%;
-  height: 45%;
+  top: 20%;
+  left: 30%;
+  width: 25%;
+  height: 30%;
   background: radial-gradient(
-    ellipse,
-    rgba(255, 255, 255, 0.7),
-    rgba(255, 255, 255, 0.2),
-    transparent
+    ellipse at center,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.6) 40%,
+    rgba(255, 255, 255, 0.2) 70%,
+    transparent 100%
   );
   border-radius: 50%;
-  animation: eyeReflection 4s ease-in-out infinite;
+  animation: eyeShine 6s ease-in-out infinite;
+  pointer-events: none;
 }
 
-@keyframes eyeReflection {
+@keyframes eyeShine {
   0%,
   100% {
-    opacity: 0.7;
-    transform: scale(1) rotate(0deg);
+    opacity: 0.8;
+    transform: scale(1);
   }
   50% {
-    opacity: 0.4;
-    transform: scale(1.1) rotate(5deg);
+    opacity: 1;
+    transform: scale(1.1);
   }
 }
 
-/* Pupila robótica */
+/* Pupila mais expressiva e amigável */
 .pupil {
-  width: 45%;
-  height: 45%;
-  background: radial-gradient(circle at 30% 25%, #2c3e50, #1a252f, #000000);
+  width: 35%;
+  height: 35%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    #1a237e 0%,
+    #283593 30%,
+    #1a1a1a 70%,
+    #000000 100%
+  );
   border-radius: 50%;
   position: absolute;
-  top: 27.5%;
-  left: 27.5%;
-  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8),
-    inset 0 0 15px rgba(52, 152, 219, 0.3);
-  border: 2px solid #34495e;
+  top: 32.5%;
+  left: 32.5%;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 2px 4px rgba(100, 200, 255, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(100, 200, 255, 0.2);
+  animation: lookAround 12s ease-in-out infinite;
 }
 
-/* Brilho central da pupila */
+/* Brilho central da pupila mais caloroso */
 .pupil::after {
   content: "";
   position: absolute;
   top: 25%;
-  left: 30%;
-  width: 20%;
-  height: 20%;
-  background: rgba(52, 152, 219, 0.9);
+  left: 35%;
+  width: 30%;
+  height: 30%;
+  background: radial-gradient(
+    circle,
+    rgba(100, 200, 255, 1) 0%,
+    rgba(100, 200, 255, 0.8) 50%,
+    rgba(100, 200, 255, 0.4) 100%
+  );
   border-radius: 50%;
-  animation: pupilCore 2s ease-in-out infinite alternate;
-  box-shadow: 0 0 10px rgba(52, 152, 219, 0.8);
+  animation: pupilGlow 3s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(100, 200, 255, 0.6);
+  pointer-events: none;
 }
 
-@keyframes pupilCore {
-  0% {
-    opacity: 0.9;
-    transform: scale(1);
-    box-shadow: 0 0 10px rgba(52, 152, 219, 0.8);
-  }
+/* Pequeno reflexo adicional que segue o movimento da pupila */
+.pupil::before {
+  content: "";
+  position: absolute;
+  top: 15%;
+  left: 25%;
+  width: 15%;
+  height: 15%;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  animation: pupilReflection 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pupilReflection {
+  0%,
   100% {
     opacity: 0.6;
-    transform: scale(1.3);
-    box-shadow: 0 0 15px rgba(52, 152, 219, 1);
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(2px, -1px) scale(1.1);
   }
 }
 
-/* Pálpebra robótica */
+@keyframes pupilGlow {
+  0%,
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(100, 200, 255, 0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+    box-shadow: 0 0 12px rgba(100, 200, 255, 1);
+  }
+}
+
+/* Animação principal: robô olhando ao redor */
+@keyframes lookAround {
+  0% {
+    transform: translate(0px, 0px);
+  }
+
+  8% {
+    transform: translate(15px, -8px); /* Olha para cima-direita */
+  }
+
+  16% {
+    transform: translate(15px, -8px); /* Mantém olhando cima-direita */
+  }
+
+  24% {
+    transform: translate(25px, 0px); /* Olha para direita */
+  }
+
+  32% {
+    transform: translate(25px, 0px); /* Mantém olhando direita */
+  }
+
+  40% {
+    transform: translate(15px, 12px); /* Olha para baixo-direita */
+  }
+
+  48% {
+    transform: translate(0px, 8px); /* Olha para baixo-centro */
+  }
+
+  56% {
+    transform: translate(-15px, 12px); /* Olha para baixo-esquerda */
+  }
+
+  64% {
+    transform: translate(-25px, 0px); /* Olha para esquerda */
+  }
+
+  72% {
+    transform: translate(-25px, 0px); /* Mantém olhando esquerda */
+  }
+
+  80% {
+    transform: translate(-15px, -8px); /* Olha para cima-esquerda */
+  }
+
+  88% {
+    transform: translate(-15px, -8px); /* Mantém olhando cima-esquerda */
+  }
+
+  96% {
+    transform: translate(0px, -5px); /* Olha para cima-centro */
+  }
+
+  100% {
+    transform: translate(0px, 0px); /* Volta ao centro */
+  }
+}
+
+/* Estados específicos que pausam ou alteram o movimento */
+.eye.hibernating .pupil {
+  animation: lookAroundSlow 20s ease-in-out infinite;
+}
+
+.eye.listening .pupil,
+.eye.processing .pupil {
+  animation: focusedLook 4s ease-in-out infinite;
+}
+
+.eye.speaking .pupil {
+  animation: expressiveLook 3s ease-in-out infinite;
+}
+
+/* Movimento mais lento quando hibernando */
+@keyframes lookAroundSlow {
+  0%,
+  100% {
+    transform: translate(0px, 0px);
+  }
+
+  12.5% {
+    transform: translate(12px, -5px);
+  }
+
+  25% {
+    transform: translate(18px, 0px);
+  }
+
+  37.5% {
+    transform: translate(12px, 8px);
+  }
+
+  50% {
+    transform: translate(0px, 5px);
+  }
+
+  62.5% {
+    transform: translate(-12px, 8px);
+  }
+
+  75% {
+    transform: translate(-18px, 0px);
+  }
+
+  87.5% {
+    transform: translate(-12px, -5px);
+  }
+}
+
+/* Movimento focado quando ouvindo/processando */
+@keyframes focusedLook {
+  0%,
+  100% {
+    transform: translate(0px, -3px);
+  }
+
+  25% {
+    transform: translate(8px, -5px);
+  }
+
+  50% {
+    transform: translate(0px, -8px);
+  }
+
+  75% {
+    transform: translate(-8px, -5px);
+  }
+}
+
+/* Movimento expressivo quando falando */
+@keyframes expressiveLook {
+  0% {
+    transform: translate(0px, 0px);
+  }
+
+  20% {
+    transform: translate(10px, -3px);
+  }
+
+  40% {
+    transform: translate(-5px, 2px);
+  }
+
+  60% {
+    transform: translate(8px, 5px);
+  }
+
+  80% {
+    transform: translate(-12px, -2px);
+  }
+
+  100% {
+    transform: translate(0px, 0px);
+  }
+}
+
+/* Pálpebra mais suave */
 .eyelid {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(145deg, #34495e, #2c3e50);
-  animation: robotBlink 6s infinite;
+  background: linear-gradient(
+    145deg,
+    rgba(240, 240, 240, 0.9),
+    rgba(200, 200, 200, 0.9)
+  );
+  animation: gentleBlink 8s infinite;
   transform-origin: top;
   border-radius: 50%;
-  border: 4px solid #2c3e50;
+  border: 3px solid rgba(100, 200, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes robotBlink {
+@keyframes gentleBlink {
   0%,
-  94%,
+  92%,
   100% {
     transform: scaleY(0);
   }
-  95%,
-  99% {
+  94%,
+  98% {
     transform: scaleY(1);
   }
 }
 
-/* Indicador de status */
+/* Indicador de status mais amigável */
 .status-indicator {
   position: absolute;
-  top: 20px;
+  top: 30px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 10px 20px;
-  background: rgba(52, 152, 219, 0.2);
-  border: 2px solid #3498db;
-  border-radius: 20px;
-  color: #3498db;
-  font-size: min(4vw, 24px);
-  font-weight: bold;
-  text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
-  animation: statusPulse 2s ease-in-out infinite alternate;
-  backdrop-filter: blur(5px);
-  transition: all 0.3s ease-in-out;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(100, 200, 255, 0.4);
+  border-radius: 25px;
+  color: #ffffff;
+  font-size: min(3.5vw, 22px);
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: statusGlow 3s ease-in-out infinite;
+  backdrop-filter: blur(10px);
+  transition: all 0.4s ease-in-out;
   z-index: 100;
 }
 
-/* Estados do indicador */
 .status-indicator.hibernating {
-  border-color: #95a5a6;
-  color: #95a5a6;
-  background: rgba(149, 165, 166, 0.2);
+  border-color: rgba(150, 150, 150, 0.4);
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .status-indicator.active {
-  border-color: #3498db;
-  color: #3498db;
-  background: rgba(52, 152, 219, 0.3);
+  border-color: rgba(100, 200, 255, 0.6);
+  color: #ffffff;
+  background: rgba(100, 200, 255, 0.2);
 }
 
 .status-indicator.listening {
-  border-color: #e67e22;
-  color: #e67e22;
-  background: rgba(230, 126, 34, 0.3);
+  border-color: rgba(255, 152, 0, 0.6);
+  color: #fff3e0;
+  background: rgba(255, 152, 0, 0.2);
 }
 
 .status-indicator.processing {
-  border-color: #9b59b6;
-  color: #9b59b6;
-  background: rgba(155, 89, 182, 0.3);
+  border-color: rgba(156, 39, 176, 0.6);
+  color: #f3e5f5;
+  background: rgba(156, 39, 176, 0.2);
 }
 
-@keyframes statusPulse {
-  0% {
-    box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
-    text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
-  }
+@keyframes statusGlow {
+  0%,
   100% {
-    box-shadow: 0 0 20px rgba(52, 152, 219, 0.6);
-    text-shadow: 0 0 15px rgba(52, 152, 219, 0.8);
+    box-shadow: 0 4px 16px rgba(100, 200, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 6px 24px rgba(100, 200, 255, 0.4);
   }
 }
 
-/* Mensagem de fala */
+/* Mensagem de fala mais acolhedora */
 .speech {
   position: absolute;
-  bottom: 30px;
+  bottom: 40px;
   width: 90%;
   text-align: center;
-  font-size: min(5vw, 28px);
-  font-weight: bold;
-  color: #ecf0f1;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7), 0 0 15px rgba(52, 152, 219, 0.4);
-  animation: speechGlow 2.5s ease-in-out infinite alternate;
+  font-size: min(4.5vw, 26px);
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(100, 200, 255, 0.3);
+  animation: speechBreathe 4s ease-in-out infinite;
   z-index: 20;
-  padding: 15px;
-  background: rgba(52, 73, 94, 0.3);
-  border-radius: 15px;
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(52, 152, 219, 0.3);
-  transition: all 0.3s ease-in-out;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(100, 200, 255, 0.2);
+  transition: all 0.4s ease-in-out;
 }
 
-@keyframes speechGlow {
-  0% {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7), 0 0 15px rgba(52, 152, 219, 0.4);
-    background: rgba(52, 73, 94, 0.3);
-  }
+@keyframes speechBreathe {
+  0%,
   100% {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 25px rgba(52, 152, 219, 0.7);
-    background: rgba(52, 73, 94, 0.5);
+    transform: translateY(0px);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(100, 200, 255, 0.3);
+  }
+  50% {
+    transform: translateY(-2px);
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 30px rgba(100, 200, 255, 0.5);
   }
 }
 
-/* Indicador de escuta */
+/* Indicadores visuais mais suaves */
 .listening-indicator {
   position: absolute;
-  bottom: 120px;
+  bottom: 140px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 5px;
+  gap: 8px;
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.4s ease-in-out;
   z-index: 50;
 }
 
@@ -386,11 +605,12 @@ body {
 }
 
 .wave {
-  width: 8px;
-  height: 30px;
-  background: #e67e22;
-  border-radius: 4px;
-  animation: waveAnimation 1s ease-in-out infinite;
+  width: 6px;
+  height: 24px;
+  background: linear-gradient(to top, #ff9800, #ffb74d);
+  border-radius: 8px;
+  animation: gentleWave 1.2s ease-in-out infinite;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
 }
 
 .wave:nth-child(2) {
@@ -401,19 +621,18 @@ body {
   animation-delay: 0.4s;
 }
 
-@keyframes waveAnimation {
+@keyframes gentleWave {
   0%,
   100% {
-    height: 30px;
-    background: #e67e22;
+    height: 24px;
+    background: linear-gradient(to top, #ff9800, #ffb74d);
   }
   50% {
-    height: 60px;
-    background: #d35400;
+    height: 48px;
+    background: linear-gradient(to top, #f57c00, #ff9800);
   }
 }
 
-/* Indicador de processamento */
 .processing-indicator {
   position: absolute;
   top: 50%;
@@ -422,13 +641,13 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: 20px;
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.4s ease-in-out;
   z-index: 50;
-  color: #9b59b6;
-  font-weight: bold;
-  font-size: min(4vw, 22px);
+  color: #f3e5f5;
+  font-weight: 600;
+  font-size: min(3.5vw, 20px);
 }
 
 .processing-indicator.show {
@@ -436,15 +655,16 @@ body {
 }
 
 .spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba(155, 89, 182, 0.3);
-  border-top: 4px solid #9b59b6;
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(156, 39, 176, 0.2);
+  border-top: 4px solid #9c27b0;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: gentleSpin 1.5s linear infinite;
+  box-shadow: 0 4px 16px rgba(156, 39, 176, 0.2);
 }
 
-@keyframes spin {
+@keyframes gentleSpin {
   0% {
     transform: rotate(0deg);
   }
@@ -453,93 +673,45 @@ body {
   }
 }
 
-/* Efeitos de energia circundantes */
-.energy-ring {
-  position: absolute;
-  width: 150%;
-  height: 150%;
-  border: 1px solid rgba(52, 152, 219, 0.2);
-  border-radius: 50%;
-  top: -25%;
-  left: -25%;
-  animation: energyRotate 20s linear infinite;
-}
-
-.energy-ring:nth-child(2) {
-  width: 120%;
-  height: 120%;
-  top: -10%;
-  left: -10%;
-  animation: energyRotate 15s linear infinite reverse;
-  border-color: rgba(52, 152, 219, 0.15);
-}
-
-@keyframes energyRotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Responsividade para diferentes tamanhos de tablet */
+/* Responsividade aprimorada */
 @media (max-width: 768px) {
   .eyes-container {
-    gap: min(6vw, 40px);
+    gap: min(5vw, 35px);
   }
 
   .eye {
-    width: min(38vw, 200px);
-    height: min(38vw, 200px);
+    width: min(36vw, 180px);
+    height: min(36vw, 180px);
   }
 
   .speech {
-    font-size: min(4vw, 20px);
-    bottom: 20px;
+    font-size: min(4vw, 18px);
+    bottom: 30px;
   }
 
   .status-indicator {
-    font-size: min(3vw, 18px);
-    top: 15px;
+    font-size: min(3vw, 16px);
+    top: 20px;
   }
 }
 
 @media (orientation: landscape) and (max-height: 600px) {
   .eyes-container {
-    gap: min(8vh, 50px);
+    gap: min(6vh, 40px);
   }
 
   .eye {
-    width: min(30vh, 220px);
-    height: min(30vh, 220px);
+    width: min(28vh, 200px);
+    height: min(28vh, 200px);
   }
 
   .speech {
-    font-size: min(3vh, 22px);
-    bottom: 15px;
+    font-size: min(3vh, 20px);
+    bottom: 20px;
   }
 
   .status-indicator {
-    font-size: min(2.5vh, 16px);
-    top: 10px;
+    font-size: min(2.5vh, 14px);
+    top: 15px;
   }
-}
-
-/* Efeito de ripple personalizado */
-@keyframes rippleEffect {
-  0% {
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0.8;
-    background: rgba(52, 152, 219, 0.6);
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(15);
-    opacity: 0;
-    background: rgba(52, 152, 219, 0.1);
-  }
-}
-
-.speech {
-  transition: transform 0.2s ease-in-out;
 }
