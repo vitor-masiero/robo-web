@@ -12,8 +12,6 @@ const STATES = {
   ERROR: "error",
 };
 
-
-
 class InocencioVoiceAssistant {
   constructor() {
     this.currentState = STATES.HIBERNATING;
@@ -28,6 +26,17 @@ class InocencioVoiceAssistant {
     this.wakeWordTimeout = null;
     this.questionTimeout = null;
     this.fallbackTimeout = null;
+    this.silenceTimeout = null;
+
+    // Detecção de silêncio
+    this.audioContext = null;
+    this.analyser = null;
+    this.microphone = null;
+    this.silenceThreshold = 30; // Limite para considerar silêncio
+    this.silenceDuration = 2000; // 2 segundos de silêncio para parar
+    this.maxRecordingTime = 10000; // 10 segundos máximo
+    this.minRecordingTime = 1000; // 1 segundo mínimo
+    this.recordingStartTime = null;
 
     // Elementos DOM
     this.statusIndicator = document.getElementById("statusIndicator");
@@ -35,39 +44,53 @@ class InocencioVoiceAssistant {
     this.processingIndicator = document.getElementById("processingIndicator");
     this.responseAudio = document.getElementById("responseAudio");
 
-    // Frases motivacionais
+    // Frases motivacionais mais intuitivas e amigáveis
     this.phrases = [
-      "Diga 'Inocêncio' para me acordar!",
-      "Estou aqui para ajudar! Me chame pelo nome.",
-      "Pronto para conversar quando você quiser!",
-      "Aguardando seu comando... Diga meu nome!",
-      "Inocêncio dormindo... Me acorde quando precisar!",
+      "👋 Olá! Diga 'Inocêncio' para começar nossa conversa!",
+      "😊 Estou dormindo... Me acorde falando 'Inocêncio'!",
+      "🎤 Pronto para te ajudar! Apenas diga meu nome: 'Inocêncio'",
+      "💤 Aguardando... Fale 'Inocêncio' quando quiser conversar!",
+      "🤖 Sou o Inocêncio! Me chame pelo nome para começarmos!",
+      "✨ Dormindo tranquilo... Diga 'Inocêncio' para me despertar!",
     ];
 
     this.init();
   }
 
-  
-  //Função adicionada para limpeza de recursos
+  // Função melhorada para limpeza de recursos
   cleanupRecording() {
-      console.log("🧹 Limpando recursos de gravação...");
-      
-      // Limpar timeout se existir
-      if (this.questionTimeout) {
-          clearTimeout(this.questionTimeout);
-          this.questionTimeout = null;
-      }
-      
-      // Parar MediaRecorder se ainda estiver ativo
-      if (this.mediaRecorder) {
-          if (this.mediaRecorder.state === 'recording') {
-              this.mediaRecorder.stop();
-          }
-          this.mediaRecorder = null;
-      }
-      
-      // Limpar chunks de áudio
-      this.audioChunks = [];
+    console.log("🧹 Limpando recursos de gravação...");
+
+    // Limpar timeouts
+    if (this.questionTimeout) {
+      clearTimeout(this.questionTimeout);
+      this.questionTimeout = null;
+    }
+
+    if (this.silenceTimeout) {
+      clearTimeout(this.silenceTimeout);
+      this.silenceTimeout = null;
+    }
+
+    // Parar MediaRecorder se ainda estiver ativo
+    if (this.mediaRecorder && this.mediaRecorder.state === "recording") {
+      this.mediaRecorder.stop();
+    }
+    this.mediaRecorder = null;
+
+    // Limpar análise de áudio
+    if (this.microphone) {
+      this.microphone.disconnect();
+      this.microphone = null;
+    }
+
+    if (this.analyser) {
+      this.analyser.disconnect();
+      this.analyser = null;
+    }
+
+    // Reset do tempo de gravação
+    this.recordingStartTime = null;
   }
 
   async init() {
@@ -77,17 +100,28 @@ class InocencioVoiceAssistant {
       await this.loadAnnyangLibrary();
       await this.checkPermissions();
       await this.setupAudioStream();
+      await this.setupAudioContext();
 
       this.setupAnnyangCommands();
       this.setupVisualEffects();
       this.startSystem();
 
       this.isInitialized = true;
-      this.updateStatus("SISTEMA PRONTO - Diga 'Inocêncio'");
+      this.updateStatus("🟢 PRONTO - Diga 'Inocêncio' para começar!");
       console.log("✅ Sistema inicializado com sucesso!");
     } catch (error) {
       console.error("❌ Erro na inicialização:", error);
       this.handleError("Falha na inicialização: " + error.message);
+    }
+  }
+
+  async setupAudioContext() {
+    try {
+      this.audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
+      console.log("✅ Contexto de áudio criado");
+    } catch (error) {
+      console.warn("⚠️ Erro ao criar contexto de áudio:", error);
     }
   }
 
@@ -124,7 +158,7 @@ class InocencioVoiceAssistant {
       throw new Error("Biblioteca de reconhecimento de voz não carregada");
     }
 
-    // Testa se a API está acessível usando uma rota que existe
+    // Testa se a API está acessível
     try {
       const response = await fetch(`${API_BASE_URL}/tts?text=teste`, {
         method: "GET",
@@ -133,7 +167,6 @@ class InocencioVoiceAssistant {
       console.log("✅ API conectada");
     } catch (error) {
       console.warn("⚠️ API pode não estar acessível:", error.message);
-      // Não falha a inicialização por causa da API - continua mesmo assim
     }
   }
 
@@ -187,15 +220,48 @@ class InocencioVoiceAssistant {
 
     annyang.addCallback("end", () => {
       console.log("🔇 Reconhecimento encerrado");
-      this.isListeningForWakeWord = false;
-      if (this.currentState === STATES.HIBERNATING) {
-        this.restartWakeWordDetection();
-      }
+
+      // Aguarda um pouco antes de resetar o flag
+      setTimeout(() => {
+        this.isListeningForWakeWord = false;
+
+        // Só reinicia se ainda estiver em hibernação e não foi interrompido intencionalmente
+        if (this.currentState === STATES.HIBERNATING) {
+          console.log("🔄 Reconhecimento encerrou, reiniciando...");
+          this.restartWakeWordDetection();
+        }
+      }, 1000);
     });
 
     annyang.addCallback("result", (phrases) => {
       console.log("🔊 Detectado:", phrases);
       this.processRecognitionResult(phrases);
+
+      // Se detectou fala mas não era palavra-chave, dá uma dica
+      if (
+        phrases &&
+        phrases.length > 0 &&
+        this.currentState === STATES.HIBERNATING
+      ) {
+        const bestMatch = phrases[0].toLowerCase();
+        const hasWakeWord = WAKE_WORDS.some((word) =>
+          this.normalizeText(bestMatch).includes(this.normalizeText(word))
+        );
+
+        if (!hasWakeWord && bestMatch.length > 3) {
+          console.log("💡 Pessoa tentou falar sem palavra-chave:", bestMatch);
+          this.updateStatus("👋 Oi! Diga 'Inocêncio' primeiro para me ativar!");
+
+          // Volta à mensagem normal depois de 3 segundos
+          setTimeout(() => {
+            if (this.currentState === STATES.HIBERNATING) {
+              this.updateStatus(
+                "😊 Fale 'Inocêncio' para começar nossa conversa!"
+              );
+            }
+          }, 3000);
+        }
+      }
     });
 
     // Configurações de confiabilidade
@@ -221,6 +287,20 @@ class InocencioVoiceAssistant {
     if (hasWakeWord && this.currentState === STATES.HIBERNATING) {
       console.log("🚀 Palavra-chave reconhecida:", bestMatch);
       this.onWakeWordDetected();
+    } else if (hasWakeWord && this.currentState !== STATES.HIBERNATING) {
+      // Pessoa tentando chamar o robô quando ele não está disponível
+      console.log(
+        "⚠️ Tentativa de ativação durante estado:",
+        this.currentState
+      );
+
+      if (this.currentState === STATES.PROCESSING) {
+        this.updateStatus("⏳ Ainda estou pensando! Aguarde...");
+      } else if (this.currentState === STATES.SPEAKING) {
+        this.updateStatus("🗣️ Deixe-me terminar de falar primeiro!");
+      } else if (this.currentState === STATES.LISTENING) {
+        this.updateStatus("👂 Já estou ouvindo! Continue falando...");
+      }
     }
   }
 
@@ -241,53 +321,98 @@ class InocencioVoiceAssistant {
   }
 
   startWakeWordDetection() {
-    if (this.isListeningForWakeWord) return;
+    if (this.isListeningForWakeWord) {
+      console.log("⚠️ Já está escutando, ignorando nova tentativa");
+      return;
+    }
 
     try {
-      annyang.start({ autoRestart: true, continuous: true });
-      this.updateStatus("ESCUTANDO - Diga 'Inocêncio'");
+      console.log("🎤 Iniciando detecção de palavra-chave...");
 
-      // Fallback: reinicia se não detectar nada em 30 segundos
+      // Marca que está tentando iniciar
+      this.isListeningForWakeWord = true;
+
+      annyang.start({ autoRestart: false, continuous: false });
+      this.updateStatus("👂 ESCUTANDO - Fale 'Inocêncio' agora!");
+
+      // Fallback: reinicia se não detectar nada em 25 segundos
       this.fallbackTimeout = setTimeout(() => {
+        console.log("⏰ Timeout de detecção, reiniciando...");
+        this.isListeningForWakeWord = false;
         this.restartWakeWordDetection();
-      }, 30000);
+      }, 25000);
     } catch (error) {
       console.error("❌ Erro ao iniciar detecção:", error);
-      setTimeout(() => this.startWakeWordDetection(), 2000);
+      this.isListeningForWakeWord = false;
+
+      // Tenta novamente após delay maior
+      setTimeout(() => {
+        if (this.currentState === STATES.HIBERNATING) {
+          this.updateStatus("🔄 Tentando novamente...");
+          this.startWakeWordDetection();
+        }
+      }, 4000);
     }
   }
 
   restartWakeWordDetection() {
     console.log("🔄 Reiniciando detecção de palavra-chave");
 
+    // Limpa timeouts existentes
     if (this.fallbackTimeout) {
       clearTimeout(this.fallbackTimeout);
       this.fallbackTimeout = null;
     }
 
-    annyang.abort();
+    // Para completamente o annyang atual
+    try {
+      annyang.abort();
+    } catch (e) {
+      console.warn("Erro ao abortar annyang:", e);
+    }
+
+    // Aguarda um tempo maior para evitar conflitos
     setTimeout(() => {
-      if (this.currentState === STATES.HIBERNATING) {
-        this.startWakeWordDetection();
+      if (
+        this.currentState === STATES.HIBERNATING &&
+        !this.isListeningForWakeWord
+      ) {
+        this.updateStatus("🔄 Reiniciando... Aguarde...");
+        setTimeout(() => {
+          this.startWakeWordDetection();
+        }, 1000);
       }
-    }, 1000);
+    }, 2000);
   }
 
   onWakeWordDetected() {
     console.log("🎯 PALAVRA-CHAVE DETECTADA!");
 
-    // Para toda detecção de palavra-chave
-    annyang.abort();
+    // Limpa flag imediatamente
     this.isListeningForWakeWord = false;
+
+    // Para toda detecção de palavra-chave
+    try {
+      annyang.abort();
+    } catch (e) {
+      console.warn("Erro ao abortar annyang:", e);
+    }
 
     if (this.fallbackTimeout) {
       clearTimeout(this.fallbackTimeout);
       this.fallbackTimeout = null;
     }
 
+    // Só processa se estiver realmente em hibernação
+    if (this.currentState !== STATES.HIBERNATING) {
+      console.log("⚠️ Não está em hibernação, ignorando palavra-chave");
+      this.updateStatus("⚠️ Estou escutando! Faça sua pergunta!");
+      return;
+    }
+
     // Transição para escuta de pergunta
     this.setState(STATES.LISTENING);
-    this.updateStatus("OUVINDO SUA PERGUNTA...");
+    this.updateStatus("🎤 PODE FALAR! Faça sua pergunta agora...");
 
     // Efeito visual
     this.triggerWakeUpEffect();
@@ -299,18 +424,22 @@ class InocencioVoiceAssistant {
   }
 
   startQuestionCapture() {
-    if (!this.audioStream) {
+    if (!this.audioStream || !this.audioContext) {
       this.handleError("Stream de áudio não disponível");
       return;
     }
 
     this.cleanupRecording();
 
-    console.log("📹 Capturando pergunta...");
+    console.log("📹 Capturando pergunta com detecção de silêncio...");
     this.audioChunks = [];
+    this.recordingStartTime = Date.now();
 
     try {
-      // Configura MediaRecorder com melhor compatibilidade
+      // Configura análise de áudio para detecção de silêncio
+      this.setupSilenceDetection();
+
+      // Configura MediaRecorder
       const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
         : MediaRecorder.isTypeSupported("audio/webm")
@@ -324,61 +453,139 @@ class InocencioVoiceAssistant {
       this.mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           this.audioChunks.push(event.data);
+          console.log(`📝 Chunk capturado: ${event.data.size} bytes`);
         }
       };
 
       this.mediaRecorder.onstop = () => {
+        console.log("⏹️ Gravação finalizada");
         this.processRecordedAudio();
       };
 
       this.mediaRecorder.onerror = (event) => {
         console.error("❌ Erro no MediaRecorder:", event);
-        this.cleanupRecording(); //Fazendo a limpeza do áudio depois de dar erro
+        this.cleanupRecording();
         this.handleError("Erro na captura de áudio");
       };
 
       // Inicia gravação
-      this.mediaRecorder.start(250);
+      this.mediaRecorder.start(100); // Chunks menores para melhor controle
 
-      // Para gravação após 5 segundos
+      // Timeout máximo de segurança
       this.questionTimeout = setTimeout(() => {
         if (this.mediaRecorder && this.mediaRecorder.state === "recording") {
-          console.log("⏹️ Gravação parada após timeout");
+          console.log("⏰ Gravação parada por timeout máximo");
           this.mediaRecorder.stop();
         }
-      }, 5000);
+      }, this.maxRecordingTime);
 
       // Animação visual
       this.startListeningAnimation();
     } catch (error) {
       console.error("❌ Erro ao configurar gravação:", error);
-      this.cleanupRecording(); //LImpando denovo se der erro
+      this.cleanupRecording();
       this.handleError("Erro na configuração de áudio");
     }
   }
 
+  setupSilenceDetection() {
+    try {
+      // Cria analisador de áudio
+      this.analyser = this.audioContext.createAnalyser();
+      this.analyser.fftSize = 256;
+      this.analyser.smoothingTimeConstant = 0.8;
+
+      // Conecta microfone ao analisador
+      this.microphone = this.audioContext.createMediaStreamSource(
+        this.audioStream
+      );
+      this.microphone.connect(this.analyser);
+
+      // Inicia monitoramento
+      this.monitorAudioLevel();
+    } catch (error) {
+      console.warn("⚠️ Erro ao configurar detecção de silêncio:", error);
+      // Continua sem detecção de silêncio
+    }
+  }
+
+  monitorAudioLevel() {
+    if (!this.analyser || this.currentState !== STATES.LISTENING) {
+      return;
+    }
+
+    const bufferLength = this.analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    this.analyser.getByteFrequencyData(dataArray);
+
+    // Calcula nível médio de áudio
+    const average =
+      dataArray.reduce((sum, value) => sum + value, 0) / bufferLength;
+
+    // Verifica se está em silêncio
+    const isSilent = average < this.silenceThreshold;
+    const recordingTime = Date.now() - this.recordingStartTime;
+
+    if (isSilent && recordingTime > this.minRecordingTime) {
+      // Inicia contador de silêncio se não existir
+      if (!this.silenceTimeout) {
+        console.log("🤫 Detectando silêncio...");
+        this.silenceTimeout = setTimeout(() => {
+          if (this.mediaRecorder && this.mediaRecorder.state === "recording") {
+            console.log("🔇 Parando gravação por silêncio prolongado");
+            this.mediaRecorder.stop();
+          }
+        }, this.silenceDuration);
+      }
+    } else {
+      // Cancela contador de silêncio se houver som
+      if (this.silenceTimeout) {
+        clearTimeout(this.silenceTimeout);
+        this.silenceTimeout = null;
+      }
+    }
+
+    // Continua monitorando
+    if (this.currentState === STATES.LISTENING) {
+      requestAnimationFrame(() => this.monitorAudioLevel());
+    }
+  }
+
   async processRecordedAudio() {
+    // Verifica se temos áudio suficiente
     if (this.audioChunks.length === 0) {
-      this.handleError("Nenhum áudio capturado");
+      console.log(
+        "⚠️ Nenhum chunk de áudio capturado, retornando ao modo hibernação"
+      );
+      this.updateStatus("🤔 Não consegui ouvir... Tente novamente!");
+      setTimeout(() => this.onResponseEnded(), 2000);
+      return;
+    }
+
+    // Verifica se a gravação foi muito curta
+    const recordingTime = Date.now() - this.recordingStartTime;
+    if (recordingTime < this.minRecordingTime) {
+      console.log("⚠️ Gravação muito curta, retornando ao modo hibernação");
+      this.updateStatus("🤔 Muito rápido! Fale mais devagar...");
+      setTimeout(() => this.onResponseEnded(), 2000);
       return;
     }
 
     this.setState(STATES.PROCESSING);
-    this.updateStatus("PROCESSANDO...");
+    this.updateStatus("🧠 PENSANDO... Aguarde um momento!");
 
     try {
-
-      //adicionei para verificação da existencia do mediaRecorder
-      const mimeType = this.mediaRecorder ? this.mediaRecorder.mimeType : "audio/webm";
-      
       // Cria blob do áudio
-      const audioBlob = new Blob(this.audioChunks, {
-        type: this.mediaRecorder.mimeType,
-      });
+      const mimeType = this.mediaRecorder
+        ? this.mediaRecorder.mimeType
+        : "audio/webm";
+      const audioBlob = new Blob(this.audioChunks, { type: mimeType });
 
       console.log("📤 Enviando áudio:", {
         size: `${(audioBlob.size / 1024).toFixed(2)}KB`,
         type: audioBlob.type,
+        duration: `${(recordingTime / 1000).toFixed(1)}s`,
+        chunks: this.audioChunks.length,
       });
 
       // Envia para API
@@ -388,9 +595,7 @@ class InocencioVoiceAssistant {
       const response = await fetch(`${API_BASE_URL}/voice`, {
         method: "POST",
         body: formData,
-
-        //Adicionei um timeout para evitar travamento
-        signal: AbortSignal.timeout(30000), // José mexeu aqui
+        signal: AbortSignal.timeout(30000),
       });
 
       if (!response.ok) {
@@ -409,18 +614,14 @@ class InocencioVoiceAssistant {
     } catch (error) {
       console.error("❌ Erro no processamento:", error);
       this.handleError("Erro: " + error.message);
-
-      //Finally: depois do try, ou do catch, sempre vai cair aqui, limpando sempre a gravação
     } finally {
-
-      //Adicionei a limpeza de recursos
       this.cleanupRecording();
     }
   }
 
   async playResponse(audioBlob) {
     this.setState(STATES.SPEAKING);
-    this.updateStatus("RESPONDENDO...");
+    this.updateStatus("🗣️ RESPONDENDO... Escute com atenção!");
 
     try {
       const audioUrl = URL.createObjectURL(audioBlob);
@@ -450,15 +651,13 @@ class InocencioVoiceAssistant {
     console.log("🔄 Voltando ao modo hibernação");
 
     this.cleanupRecording();
-
     this.setState(STATES.HIBERNATING);
-    this.updateStatus("PRONTO - Diga 'Inocêncio'");
+    this.updateStatus("✅ PRONTO - Diga 'Inocêncio' para nova pergunta!");
 
-    // Aguarda um tempo maior antes de voltar a escutar
-    // Isso dá tempo para o backend limpar recursos
+    // Aguarda um tempo antes de voltar a escutar
     setTimeout(() => {
       this.startWakeWordDetection();
-    }, 3000); // Aumentado de 2s para 3s
+    }, 3000);
   }
 
   setState(newState) {
@@ -506,9 +705,18 @@ class InocencioVoiceAssistant {
   handleRecognitionError(error) {
     console.warn("⚠️ Erro de reconhecimento:", error);
 
-    // Erros que podem ser ignorados
-    const ignorableErrors = ["no-speech", "aborted"];
+    // Erros que podem ser completamente ignorados
+    const ignorableErrors = ["no-speech", "aborted", "network"];
     if (ignorableErrors.includes(error.error)) {
+      // Para erro "aborted", aguarda um pouco mais antes de reiniciar
+      if (
+        error.error === "aborted" &&
+        this.currentState === STATES.HIBERNATING
+      ) {
+        setTimeout(() => {
+          this.restartWakeWordDetection();
+        }, 3000);
+      }
       return;
     }
 
@@ -518,25 +726,44 @@ class InocencioVoiceAssistant {
       return;
     }
 
-    // Outros erros: restart automático
+    // Outros erros: restart automático com delay maior
     setTimeout(() => {
       if (this.currentState === STATES.HIBERNATING) {
         this.restartWakeWordDetection();
       }
-    }, 2000);
+    }, 5000);
   }
 
   handleError(message) {
     console.error("❌ ERRO:", message);
     this.setState(STATES.ERROR);
-    this.updateStatus("ERRO - " + message);
 
-    // Tenta recuperar após 5 segundos
+    // Mensagens de erro mais amigáveis
+    let friendlyMessage = "❌ ERRO";
+
+    if (message.includes("microfone")) {
+      friendlyMessage = "🎤 Preciso do seu microfone para funcionar!";
+    } else if (message.includes("API")) {
+      friendlyMessage = "🌐 Problema de conexão! Tentando novamente...";
+    } else if (message.includes("áudio")) {
+      friendlyMessage = "🔊 Problema com o áudio! Reiniciando...";
+    } else {
+      friendlyMessage = "⚠️ Algo deu errado! Reiniciando sistema...";
+    }
+
+    this.updateStatus(friendlyMessage);
+
+    // Tenta recuperar após 4 segundos
     setTimeout(() => {
       this.setState(STATES.HIBERNATING);
-      this.updateStatus("RECUPERANDO...");
-      this.startWakeWordDetection();
-    }, 5000);
+      this.updateStatus("🔄 RECUPERANDO... Aguarde um momento...");
+
+      // Aguarda mais um pouco antes de voltar ao normal
+      setTimeout(() => {
+        this.updateStatus("✅ PRONTO - Diga 'Inocêncio' para começar!");
+        this.startWakeWordDetection();
+      }, 2000);
+    }, 4000);
   }
 
   // Efeitos visuais
@@ -611,6 +838,7 @@ class InocencioVoiceAssistant {
         !this.isListeningForWakeWord
       ) {
         this.phraseIndex = (this.phraseIndex + 1) % this.phrases.length;
+        this.updateStatus(this.phrases[this.phraseIndex]);
         console.log("💭", this.phrases[this.phraseIndex]);
       }
     }, 6000);
@@ -673,6 +901,8 @@ class InocencioVoiceAssistant {
       listening: this.isListeningForWakeWord,
       annyang: !!window.annyang,
       stream: !!this.audioStream,
+      audioContext: !!this.audioContext,
+      recording: this.mediaRecorder?.state || "inactive",
     };
   }
 }
@@ -711,5 +941,7 @@ window.addEventListener("beforeunload", () => {
   if (inocencio && window.annyang) {
     annyang.abort();
   }
+  if (inocencio) {
+    inocencio.cleanupRecording();
+  }
 });
-
